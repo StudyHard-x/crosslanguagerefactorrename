@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Hello {
     @GetMapping("/hello")
-    public String Hello(@RequestParam("name") String name, Model model){
+    public String Hello(){
 
-        model.addAttribute("msg",name);
 
         return "haha";
     }
