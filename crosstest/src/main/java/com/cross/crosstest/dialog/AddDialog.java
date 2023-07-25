@@ -10,30 +10,29 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AddDialog extends DialogWrapper {
-    private EditorTextField fileField;
+
     private EditorTextField apiField;
     private String selectedApi;
 
     public AddDialog(String selectedApi) {
         super(true);
         this.selectedApi = selectedApi;
-        setTitle("select");
+        setTitle("Rename");
         init();
     }
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
         JPanel panel = new JPanel(new GridBagLayout());
-        fileField = new EditorTextField("File Location");
+
         apiField = new EditorTextField(selectedApi);
-        fileField.setPreferredSize(new Dimension(200,50));
         apiField.setPreferredSize(new Dimension(200,100));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
-        panel.add(fileField, gbc);
+        panel.add(apiField, gbc);
 
         gbc.gridy = 1;
         panel.add(apiField, gbc);
@@ -47,11 +46,8 @@ public class AddDialog extends DialogWrapper {
         JButton button = new JButton("Next");
 
         button.addActionListener(e -> {
-            String location = fileField.getText();
             String text = apiField.getText();
-            RestfulApiParser.parseApi(location);
-
-//            System.out.println(text);
+            System.out.println(text);
         });
         pan.add(button);
         return pan;

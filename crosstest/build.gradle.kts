@@ -1,26 +1,29 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.10.1"
+    id("org.jetbrains.intellij") version "1.13.0"
 }
+
 
 group = "com.cross"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
+    maven { url = uri("https://plugins.jetbrains.com/maven/") }
 }
 
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    version.set("2022.3.2")
-    type.set("IC") // Target IDE Platform
-
-    plugins.set(listOf(/* Plugin Dependencies */))
+    localPath.set("D:\\intellij2023\\IntelliJ IDEA 2022.3.2")
+//    version.set("2022.3.2")
+//    type.set("IC") // Target IDE Platform
+    plugins.set(listOf("java", "properties","JavaScript"))
 }
 
 dependencies {
-    implementation("com.github.javaparser:javaparser-core:3.25.3")
+    implementation("com.github.javaparser:javaparser-core:3.25.3");
 }
 
 tasks {
@@ -45,4 +48,6 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
+
+
 }

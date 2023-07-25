@@ -32,20 +32,20 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public Users updateUser(Integer id, Users users) {
-        Users existingUser = getUserById(id);
-        if (existingUser != null) {
-            existingUser.setName(users.getName());
-            existingUser.setAge(users.getAge());
-            existingUser.setNumber(users.getNumber());
-            return usersDao.save(existingUser);
-        }
         return null;
     }
+
 
     @Override
     public void deleteUser(Integer id) {
         usersDao.deleteById(id);
     }
+
+    @Override
+    public Users updateAge(Integer id, Integer age) {
+        return null;
+    }
+
 
 //    /**
 //     * 通过ID查询单条数据

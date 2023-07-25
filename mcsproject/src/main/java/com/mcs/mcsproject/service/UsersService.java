@@ -1,8 +1,6 @@
 package com.mcs.mcsproject.service;
 
 import com.mcs.mcsproject.entity.Users;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -18,6 +16,7 @@ public interface UsersService {
     Users createUser(Users users);
     Users updateUser(Integer id, Users users);
     void deleteUser(Integer id);
+    Users updateAge(Integer id, Integer age);
 
 
 
