@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
+import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.apache.tools.ant.taskdefs.Java;
 
@@ -30,109 +31,180 @@ public class upAction extends AnAction {
 //        System.out.println("element: " + selectedElement);
 //        System.out.println("element text: " + selectedElement.getText());
         Project project = e.getProject();
+        String fullUrl = null;
         PsiFile psiFile = e.getRequiredData(CommonDataKeys.PSI_FILE);
         SelectionModel selectionModel = editor.getSelectionModel();
         String fileName = psiFile.getName();
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        String type = "";
+
+
 
         if ("java".equals(extension)) {
             JavaToVue javaToVue = new JavaToVue();
             int start = selectionModel.getSelectionStart();
             PsiElement startElement = psiFile.findElementAt(start);
-            PsiElement JavaToVueElement = startElement;
+            PsiElement selectElement = startElement;
             System.out.println("Start element: " + startElement.getText());
+            PsiElement parent = startElement.getParent(); // 查看选中代码的父元素
+            System.out.println(selectElement instanceof PsiJavaToken);
 
-            PsiElement parent = startElement.getParent(); //查看选中代码的父元素
-            //遍历父元素，因为它的首个父元素可能不是PsiMethodCallExpression
-            while (!(parent instanceof PsiMethodCallExpression) && parent != null) {
-                parent = parent.getParent();
+            // map
+            if(selectElement instanceof PsiJavaToken){
+                // 遍历父元素，因为它的首个父元素可能不是我们想要的类型
+                while (parent != null && !(parent instanceof PsiMethodCallExpression) && !(parent instanceof PsiAnnotation)) {
+                    parent = parent.getParent();
+                }
+
+                if (parent instanceof PsiMethodCallExpression) {
+//                    System.out.println("parent is map");
+                    PsiMethodCallExpression methodCall = (PsiMethodCallExpression) parent;
+                    PsiReferenceExpression methodExpression = methodCall.getMethodExpression();// 获取方法调用表达式
+                    String methodName = methodExpression.getReferenceName(); // 获取方法名
+                    // 检查方法名是否为"put"
+                    if ("put".equals(methodName)) {
+                        PsiExpressionList argumentList = methodCall.getArgumentList(); // 获取方法的参数列表
+                        PsiExpression[] arguments = argumentList.getExpressions();  // 获取参数数组
+
+                        // 如果参数数量是2并且第一个参数就是开始位置的PsiElement的父元素
+                        if (arguments.length == 2 && arguments[0] == startElement.getParent()) {
+                            System.out.println("The selected element is a key in a Map.put(key, value) call.");
+
+                            // 检查map是否被返回
+                            PsiMethod psiMethod = PsiTreeUtil.getParentOfType(parent, PsiMethod.class);
+                            System.out.println("method: "+psiMethod);
+                            if (psiMethod != null) {
+                                PsiClass psiClass = psiMethod.getContainingClass();
+
+                                if (psiClass != null) {
+                                    // Find @RequestMapping annotation in class and method
+                                    PsiAnnotation classAnnotation = AnnotationUtil.findAnnotation(psiClass, "org.springframework.web.bind.annotation.RequestMapping");
+                                    PsiAnnotation methodAnnotation = AnnotationUtil.findAnnotation(psiMethod, "org.springframework.web.bind.annotation.GetMapping");
+
+                                    if (classAnnotation != null && methodAnnotation != null) {
+                                        String classUrl = AnnotationUtil.getDeclaredStringAttributeValue(classAnnotation, "value");
+                                        String methodUrl = AnnotationUtil.getDeclaredStringAttributeValue(methodAnnotation, "value");
+
+                                        if (classUrl != null && methodUrl != null) {
+                                            fullUrl = classUrl + methodUrl;
+                                            System.out.println("fullUrl: " + fullUrl);
+                                        }
+                                    }
+                                }
+
+
+
+                                PsiStatement returnStatement = null;
+                                PsiCodeBlock methodBody = psiMethod.getBody();
+                                if (methodBody != null) {
+                                    for (PsiStatement statement : methodBody.getStatements()) {
+                                        if (statement instanceof PsiReturnStatement) {
+                                            returnStatement = statement;
+//                                        System.out.println("returnStatement: " + returnStatement);
+                                               break;
+                                        }
+                                    }
+                                }
+                                if (returnStatement != null) {
+                                    System.out.println("returnStatement: " + returnStatement);
+                                    // 从 return 语句中获取返回的表达式，也就是 return 关键字后面的部分。例如，在 return map; 中，这个表达式就是 map
+                                    PsiExpression returnedExpression = ((PsiReturnStatement) returnStatement).getReturnValue();
+                                    if (returnedExpression instanceof PsiReferenceExpression) {
+
+                                        PsiElement resolvedReturnedExpression = ((PsiReferenceExpression) returnedExpression).resolve();
+                                        PsiElement resolvedMethodCall = ((PsiReferenceExpression) methodExpression.getQualifierExpression()).resolve();
+                                        // 如果返回的变量和methodCall的变量是同一个，说明这个map被返回
+                                        if (resolvedReturnedExpression.equals(resolvedMethodCall)) {
+                                            System.out.println("The Map with the selected key is returned to the frontend.");
+                                            //rename
+                                            String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
+
+                                            // If user has entered a name, rename the selected element
+                                            if (newName != null && !newName.isEmpty()) {
+                                                type = "map";
+                                                String finalFullUrl = fullUrl;
+                                                String finalType = type;
+                                                WriteCommandAction.runWriteCommandAction(project, () -> {
+                                                    PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
+                                                    PsiElement newKey = factory.createExpressionFromText("\"" + newName + "\"", null);
+                                                    CodeStyleManager.getInstance(project).reformat(newKey);
+                                                    startElement.replace(newKey);
+                                                    javaToVue.toVue(selectElement, newKey, project, finalFullUrl, finalType);
+                                                });
+                                            } else {
+                                                Messages.showErrorDialog(project, "The new Name can not be empty", "Error");
+                                            }
+
+                                        }else {
+                                            System.out.println("The Map is not returned to the frontend or " +
+                                                    "Use the ResponseEntity object to encapsulate the return value etc. ");
+                                        }
+                                    }
+                                } else {
+                                    System.out.println("ReturnStatement null");
+                                }
+                            }
+                        }
+                    }
+
+                    //url
+                } else if (parent instanceof PsiAnnotation) {
+
+                    System.out.println("get url");
+                    PsiAnnotation annotation = (PsiAnnotation) parent;
+                    if (annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.GetMapping")
+                    || annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.PostMapping")) {
+
+                        //获取requestMapping
+                        PsiClass containingClass = PsiTreeUtil.getParentOfType(selectElement, PsiClass.class);
+
+                        PsiAnnotation classAnnotation = AnnotationUtil.findAnnotation(containingClass, "org.springframework.web.bind.annotation.RequestMapping");
+                        if (classAnnotation != null && annotation != null) {
+                            String classUrl = AnnotationUtil.getDeclaredStringAttributeValue(classAnnotation, "value");
+                            String methodUrl = AnnotationUtil.getDeclaredStringAttributeValue(annotation, "value");
+                            if (classUrl != null && methodUrl != null) {
+                                fullUrl = classUrl + methodUrl;
+                                String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
+
+                                // If user has entered a name, rename the selected element
+                                if (newName != null && !newName.isEmpty()) {
+                                    if (!newName.startsWith("/")) {
+                                        newName = "/" + newName;
+                                    }
+
+                                    String finalFullUrl = fullUrl;
+                                    type = "url";
+                                    String finalType = type;
+                                    String finalNewName = newName;
+                                    WriteCommandAction.runWriteCommandAction(project, () -> {
+                                        PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
+                                        PsiElement newKey = factory.createExpressionFromText("\"" + finalNewName + "\"", null);
+                                        CodeStyleManager.getInstance(project).reformat(newKey);
+                                        startElement.replace(newKey);
+                                        javaToVue.toVue(selectElement, newKey, project, finalFullUrl, finalType);
+                                    });
+                                } else {
+                                    Messages.showErrorDialog(project, "The new Name can not be empty", "Error");
+                                }
+                            }
+                        }
+
+                    }
+                    if (annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.RequestMapping")){
+
+
+                    }
+                } else {
+                    // psiElement 是一个字符串，但不是 URL 或 map 的一部分
+                    // 这可能是一个普通的字符串，我们可以进一步检查
+                    // 或者在这里进行相关处理
+                }
             }
 
 
             if (parent instanceof PsiMethodCallExpression) {
                 // 将父元素强制转化为PsiMethodCallExpression类型
-                PsiMethodCallExpression methodCall = (PsiMethodCallExpression) parent;
-                PsiReferenceExpression methodExpression = methodCall.getMethodExpression();// 获取方法调用表达式
-                String methodName = methodExpression.getReferenceName(); // 获取方法名
-                // 检查方法名是否为"put"
-                if ("put".equals(methodName)) {
-                    PsiExpressionList argumentList = methodCall.getArgumentList(); // 获取方法的参数列表
-                    PsiExpression[] arguments = argumentList.getExpressions();  // 获取参数数组
 
-                    // 如果参数数量是2并且第一个参数就是开始位置的PsiElement的父元素
-                    if (arguments.length == 2 && arguments[0] == startElement.getParent()) {
-                        System.out.println("The selected element is a key in a Map.put(key, value) call.");
-
-                        // 检查map是否被返回
-                        PsiMethod psiMethod = PsiTreeUtil.getParentOfType(parent, PsiMethod.class);
-                        System.out.println("method: "+psiMethod);
-                        if (psiMethod != null) {
-                            PsiClass psiClass = psiMethod.getContainingClass();
-
-                            if (psiClass != null) {
-                                // Find @RequestMapping annotation in class and method
-                                PsiAnnotation classAnnotation = AnnotationUtil.findAnnotation(psiClass, "org.springframework.web.bind.annotation.RequestMapping");
-                                PsiAnnotation methodAnnotation = AnnotationUtil.findAnnotation(psiMethod, "org.springframework.web.bind.annotation.GetMapping");
-
-                                if (classAnnotation != null && methodAnnotation != null) {
-                                    String classUrl = AnnotationUtil.getDeclaredStringAttributeValue(classAnnotation, "value");
-                                    String methodUrl = AnnotationUtil.getDeclaredStringAttributeValue(methodAnnotation, "value");
-
-                                    if (classUrl != null && methodUrl != null) {
-                                        String fullUrl = classUrl  + methodUrl;
-                                        System.out.println("fullUrl: " + fullUrl);
-                                    }
-                                }
-                            }
-
-
-                            PsiStatement returnStatement = null;
-                            PsiCodeBlock methodBody = psiMethod.getBody();
-                            if (methodBody != null) {
-                                for (PsiStatement statement : methodBody.getStatements()) {
-                                    if (statement instanceof PsiReturnStatement) {
-                                        returnStatement = statement;
-//                                        System.out.println("returnStatement: " + returnStatement);
-                                        break;
-                                    }
-                                }
-                            }
-//                            if (returnStatement != null) {
-//                                System.out.println("returnStatement: " + returnStatement);
-//                                // 从 return 语句中获取返回的表达式，也就是 return 关键字后面的部分。例如，在 return map; 中，这个表达式就是 map
-//                                PsiExpression returnedExpression = ((PsiReturnStatement) returnStatement).getReturnValue();
-//                                if (returnedExpression instanceof PsiReferenceExpression) {
-//
-//                                    PsiElement resolvedReturnedExpression = ((PsiReferenceExpression) returnedExpression).resolve();
-//                                    PsiElement resolvedMethodCall = ((PsiReferenceExpression) methodExpression.getQualifierExpression()).resolve();
-//                                    // 如果返回的变量和methodCall的变量是同一个，说明这个map被返回
-//                                    if (resolvedReturnedExpression.equals(resolvedMethodCall)) {
-//                                        System.out.println("The Map with the selected key is returned to the frontend.");
-//                                        //rename
-//                                        String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
-//
-//                                        // If user has entered a name, rename the selected element
-//                                        if (newName != null && !newName.isEmpty()) {
-//                                            WriteCommandAction.runWriteCommandAction(project, () -> {
-//                                                PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
-//                                                PsiElement newKey = factory.createExpressionFromText("\"" + newName + "\"", null);
-//                                                CodeStyleManager.getInstance(project).reformat(newKey);
-//                                                startElement.replace(newKey);
-////                                                javaToVue.toVue(JavaToVueElement, newKey, );
-//                                            });
-//                                        }
-//
-//                                    }else {
-//                                        System.out.println("The Map is not returned to the frontend or " +
-//                                                "Use the ResponseEntity object to encapsulate the return value etc. ");
-//                                    }
-//                                }
-//                            } else {
-//                                System.out.println("ReturnStatement null");
-//                            }
-                        }
-                    }
-                }
             }else {
 
             }
@@ -268,6 +340,24 @@ public class upAction extends AnAction {
 //            throw new RuntimeException(ex);
 //        }
 
+
+
+        //先检测是否运行javatovue，再更改原文件中的代码。
+//        PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
+//        PsiElement newKey = factory.createExpressionFromText("\"" + newName + "\"", null);
+//        CodeStyleManager.getInstance(project).reformat(newKey);
+//
+//        boolean result = javaToVue.toVue(selectElement, newKey, project, finalFullUrl);
+//        if (result) {
+//            WriteCommandAction.runWriteCommandAction(project, () -> {
+//                startElement.replace(newKey);
+//            });
+//        } else {
+//            ApplicationManager.getApplication().invokeLater(() -> {
+//                Messages.showMessageDialog(project, "javaToVue.toVue failed to run successfully.",
+//                        "Error", Messages.getErrorIcon());
+//            });
+//        }
 
     }
 }
