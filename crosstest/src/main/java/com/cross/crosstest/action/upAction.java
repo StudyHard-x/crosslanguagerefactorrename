@@ -9,12 +9,15 @@ import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.SelectionModel;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.InputValidator;
+import com.intellij.openapi.ui.InputValidatorEx;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.apache.tools.ant.taskdefs.Java;
+import org.jetbrains.annotations.Nullable;
 
 
 public class upAction extends AnAction {
@@ -117,7 +120,8 @@ public class upAction extends AnAction {
                                         if (resolvedReturnedExpression.equals(resolvedMethodCall)) {
                                             System.out.println("The Map with the selected key is returned to the frontend.");
                                             //rename
-                                            String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
+//                                            String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
+                                            String newName = getNewName(project);
 
                                             // If user has entered a name, rename the selected element
                                             if (newName != null && !newName.isEmpty()) {
@@ -164,7 +168,7 @@ public class upAction extends AnAction {
                             String methodUrl = AnnotationUtil.getDeclaredStringAttributeValue(annotation, "value");
                             if (classUrl != null && methodUrl != null) {
                                 fullUrl = classUrl + methodUrl;
-                                String newName = Messages.showInputDialog(project, "Enter new name", "Rename", null);
+                                String newName = getNewName(project);
 
                                 // If user has entered a name, rename the selected element
                                 if (newName != null && !newName.isEmpty()) {
@@ -209,7 +213,34 @@ public class upAction extends AnAction {
 
             }
 
-        } else if ("js".equals(extension) || "vue".equals(extension)) {
+        } else if ("vue".equals(extension)) {
+
+            JSObjectLiteralExpression objectLiteral = PsiTreeUtil.getParentOfType(selectedElement, JSObjectLiteralExpression.class);
+
+
+            if (objectLiteral != null) {
+                // 3. Find the enclosing argument list
+                JSArgumentList argumentList = PsiTreeUtil.getParentOfType(objectLiteral, JSArgumentList.class);
+                if (argumentList != null) {
+                    PsiElement[] arguments = argumentList.getArguments();
+                    for (PsiElement argument : arguments) {
+                        System.out.println(argument.getText());
+                    }
+
+                    // 4. Access the URL argument
+                    PsiElement urlArgument = argumentList.getArguments()[0];
+                    System.out.println("The URL is: " + urlArgument.getText());
+
+                    // 5. Access the enclosing function
+                    JSFunction function = PsiTreeUtil.getParentOfType(argumentList, JSFunction.class);
+                    if (function != null) {
+                        System.out.println("The enclosing function is: " + function.getName());
+                    }
+                }
+            }
+
+
+        } else if ("js".equals(extension)) {
             // This is a JavaScript or Vue.js file.
 
 
@@ -278,29 +309,6 @@ public class upAction extends AnAction {
 
         // ============================================
 
-//        JSObjectLiteralExpression objectLiteral = PsiTreeUtil.getParentOfType(selectedElement, JSObjectLiteralExpression.class);
-
-
-//        if (objectLiteral != null) {
-//            // 3. Find the enclosing argument list
-//            JSArgumentList argumentList = PsiTreeUtil.getParentOfType(objectLiteral, JSArgumentList.class);
-//            if (argumentList != null) {
-//                PsiElement[] arguments = argumentList.getArguments();
-//                for (PsiElement argument : arguments) {
-//                    System.out.println(argument.getText());
-//                }
-//
-//                // 4. Access the URL argument
-//                PsiElement urlArgument = argumentList.getArguments()[0];
-//                System.out.println("The URL is: " + urlArgument.getText());
-//
-//                // 5. Access the enclosing function
-//                JSFunction function = PsiTreeUtil.getParentOfType(argumentList, JSFunction.class);
-//                if (function != null) {
-//                    System.out.println("The enclosing function is: " + function.getName());
-//                }
-//            }
-//        }
 
 
 
@@ -359,5 +367,57 @@ public class upAction extends AnAction {
 //            });
 //        }
 
+    }
+
+    @Nullable
+    private static String getNewName(Project project) {
+        String input = Messages.showInputDialog(project, "Input new name", "Rename", Messages.getQuestionIcon(), "", new InputValidatorEx() {
+            private String errorText = null;
+
+            @Override
+            public boolean checkInput(String inputString) {
+                // Check if input contains numbers
+                if(inputString.matches(".*\\d.*")){
+//                    errorText = "'"+inputString+"' cannot contain numbers";
+                    errorText = "cannot contain numbers";
+                    return false;
+                }
+                // Check input length
+                if(inputString.length() > 10){
+                    errorText = "cannot exceed 10 characters";
+                    return false;
+                }
+                // Check if input contains special characters
+                if(inputString.matches(".*[^a-zA-Z0-9_].*")){
+                    errorText = "cannot contain special characters";
+                    return false;
+                }
+                // Check if input is a reserved word
+                String[] reservedWords = {"new", "class", "public", "private", "protected", "final", "void",
+                        "extends", "implements", "static", "try", "catch", "finally", "throw", "throws", "return",
+                        "this", "super", "null", "true", "false", "instanceof", "enum", "int", "long", "double", "char",
+                        "boolean", "byte", "short", "float", "synchronized", "volatile", "transient", "interface", "abstract",
+                        "strictfp", "package", "import", "assert", "default", "continue", "break", "do", "while", "switch", "case",
+                        "for", "if", "else"};
+                for(String word : reservedWords){
+                    if(word.equals(inputString)){
+                        errorText = "not a valid identifier";
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean canClose(String inputString) {
+                return this.checkInput(inputString);
+            }
+
+            @Override
+            public String getErrorText(String inputString) {
+                return errorText;
+            }
+        });
+        return input;
     }
 }
