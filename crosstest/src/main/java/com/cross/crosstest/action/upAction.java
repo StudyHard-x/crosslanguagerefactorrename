@@ -2,6 +2,9 @@ package com.cross.crosstest.action;
 
 import com.cross.crosstest.api.JavaToVue;
 import com.intellij.codeInsight.AnnotationUtil;
+import com.intellij.lang.javascript.psi.*;
+import com.intellij.lang.javascript.psi.ecma6.JSStringTemplateExpression;
+import com.intellij.microservices.url.UrlTargetInfo;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -15,7 +18,9 @@ import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.impl.source.tree.java.PsiJavaTokenImpl;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.intellij.util.Query;
 import org.apache.tools.ant.taskdefs.Java;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,24 +41,22 @@ public class upAction extends AnAction {
         Project project = e.getProject();
         String fullUrl = null;
         PsiFile psiFile = e.getRequiredData(CommonDataKeys.PSI_FILE);
+        PsiElement selectedElement = e.getData(CommonDataKeys.PSI_ELEMENT);
         SelectionModel selectionModel = editor.getSelectionModel();
         String fileName = psiFile.getName();
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
         String type = "";
 
-
-
         if ("java".equals(extension)) {
-            JavaToVue javaToVue = new JavaToVue();
             int start = selectionModel.getSelectionStart();
-            PsiElement startElement = psiFile.findElementAt(start);
-            PsiElement selectElement = startElement;
-            System.out.println("Start element: " + startElement.getText());
-            PsiElement parent = startElement.getParent(); // 查看选中代码的父元素
-            System.out.println(selectElement instanceof PsiJavaToken);
+            PsiElement selectJavaElement = psiFile.findElementAt(start);
+            System.out.println("Start element: " + selectJavaElement.getText());
+            JavaToVue javaToVue = new JavaToVue();
+            PsiElement parent = selectJavaElement.getParent(); // 查看选中代码的父元素
+            System.out.println(selectJavaElement instanceof PsiJavaToken);
 
             // map
-            if(selectElement instanceof PsiJavaToken){
+            if(selectJavaElement instanceof PsiJavaToken){
                 // 遍历父元素，因为它的首个父元素可能不是我们想要的类型
                 while (parent != null && !(parent instanceof PsiMethodCallExpression) && !(parent instanceof PsiAnnotation)) {
                     parent = parent.getParent();
@@ -70,7 +73,7 @@ public class upAction extends AnAction {
                         PsiExpression[] arguments = argumentList.getExpressions();  // 获取参数数组
 
                         // 如果参数数量是2并且第一个参数就是开始位置的PsiElement的父元素
-                        if (arguments.length == 2 && arguments[0] == startElement.getParent()) {
+                        if (arguments.length == 2 && arguments[0] == selectJavaElement.getParent()) {
                             System.out.println("The selected element is a key in a Map.put(key, value) call.");
 
                             // 检查map是否被返回
@@ -132,8 +135,8 @@ public class upAction extends AnAction {
                                                     PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
                                                     PsiElement newKey = factory.createExpressionFromText("\"" + newName + "\"", null);
                                                     CodeStyleManager.getInstance(project).reformat(newKey);
-                                                    startElement.replace(newKey);
-                                                    javaToVue.toVue(selectElement, newKey, project, finalFullUrl, finalType);
+                                                    selectJavaElement.replace(newKey);
+                                                    javaToVue.toVue(selectJavaElement, newKey, project, finalFullUrl, finalType);
                                                 });
                                             } else {
                                                 Messages.showErrorDialog(project, "The new Name can not be empty", "Error");
@@ -160,7 +163,7 @@ public class upAction extends AnAction {
                     || annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.PostMapping")) {
 
                         //获取requestMapping
-                        PsiClass containingClass = PsiTreeUtil.getParentOfType(selectElement, PsiClass.class);
+                        PsiClass containingClass = PsiTreeUtil.getParentOfType(selectJavaElement, PsiClass.class);
 
                         PsiAnnotation classAnnotation = AnnotationUtil.findAnnotation(containingClass, "org.springframework.web.bind.annotation.RequestMapping");
                         if (classAnnotation != null && annotation != null) {
@@ -184,8 +187,8 @@ public class upAction extends AnAction {
                                         PsiElementFactory factory = JavaPsiFacade.getInstance(project).getElementFactory();
                                         PsiElement newKey = factory.createExpressionFromText("\"" + finalNewName + "\"", null);
                                         CodeStyleManager.getInstance(project).reformat(newKey);
-                                        startElement.replace(newKey);
-                                        javaToVue.toVue(selectElement, newKey, project, finalFullUrl, finalType);
+                                        selectJavaElement.replace(newKey);
+                                        javaToVue.toVue(selectJavaElement, newKey, project, finalFullUrl, finalType);
                                     });
                                 } else {
                                     Messages.showErrorDialog(project, "The new Name can not be empty", "Error");
@@ -214,30 +217,78 @@ public class upAction extends AnAction {
             }
 
         } else if ("vue".equals(extension)) {
+            int start = selectionModel.getSelectionStart();
+            PsiElement selectVueElement = psiFile.findElementAt(start);
+            System.out.println("select: " + selectedElement);
+            System.out.println("select text: " + selectVueElement.getText());
+            System.out.println("select text type: " + selectVueElement.getClass().getSimpleName());
 
-            JSObjectLiteralExpression objectLiteral = PsiTreeUtil.getParentOfType(selectedElement, JSObjectLiteralExpression.class);
+            System.out.println("editor: " + editor.getSelectionModel().getSelectedText());
+            System.out.println("type:" + selectedElement.getClass().getSimpleName());
 
+            if (selectedElement instanceof JSProperty){
+                System.out.println("find JSProperty");
 
-            if (objectLiteral != null) {
-                // 3. Find the enclosing argument list
-                JSArgumentList argumentList = PsiTreeUtil.getParentOfType(objectLiteral, JSArgumentList.class);
-                if (argumentList != null) {
-                    PsiElement[] arguments = argumentList.getArguments();
-                    for (PsiElement argument : arguments) {
-                        System.out.println(argument.getText());
-                    }
-
-                    // 4. Access the URL argument
-                    PsiElement urlArgument = argumentList.getArguments()[0];
-                    System.out.println("The URL is: " + urlArgument.getText());
-
-                    // 5. Access the enclosing function
-                    JSFunction function = PsiTreeUtil.getParentOfType(argumentList, JSFunction.class);
-                    if (function != null) {
-                        System.out.println("The enclosing function is: " + function.getName());
-                    }
+            } else if (selectedElement instanceof JSLiteralExpression){
+                String newName = getNewName(project);
+                if (newName != null && !newName.isEmpty()) {
+                    System.out.println("new name: " + newName);
                 }
+            }else if (selectedElement.getClass().getSimpleName().equals("UrlTargetInfoFakeElement")){
+                String newName = getNewName(project);
+                String oldName = editor.getSelectionModel().getSelectedText();
+                String oldUrl =  selectVueElement.getText();
+                String newUrl = oldUrl.replace(oldName, newName);
+
+                if (newName != null && !newName.isEmpty()) {
+                    WriteCommandAction.runWriteCommandAction(project, () -> {
+                        PsiElement newElement = selectVueElement.replace(JavaPsiFacade.getElementFactory(project).createExpressionFromText(newUrl, null));
+                        CodeStyleManager.getInstance(project).reformat(newElement);
+                    });
+
+                }
+
             }
+
+
+
+//            Query<PsiReference> search = ReferencesSearch.search(selectedElement);
+//                for (PsiReference reference : search) {
+//                    PsiElement element = reference.getElement();
+//                    if (element instanceof JSStringTemplateExpression) {
+//                        System.out.println("A string template expression has been found." + element);
+//                        System.out.println("The selected URL is: " + element.getText());
+//                    } else if (element instanceof JSObjectLiteralExpression) {
+//                        System.out.println("A JS object literal expression has been found.");
+//                        System.out.println("The selected object is: " + element.getText());
+//                    } else {
+//                        // Handle other types of PsiElement...
+//                        System.out.println("A " + element.getClass().getSimpleName() + " has been found.");
+//                        System.out.println("The selected element is: " + element.getText());
+//                    }
+//                }
+
+//            JSObjectLiteralExpression objectLiteral = PsiTreeUtil.getParentOfType(selectElement, JSObjectLiteralExpression.class);
+
+//            if (objectLiteral != null) {
+//                // 3. Find the enclosing argument list
+//                JSArgumentList argumentList = PsiTreeUtil.getParentOfType(objectLiteral, JSArgumentList.class);
+//                if (argumentList != null) {
+//                    PsiElement[] arguments = argumentList.getArguments();
+//                    for (PsiElement argument : arguments) {
+//                        System.out.println(argument.getText());
+//                    }
+//                    // 4. Access the URL argument
+//                    PsiElement urlArgument = argumentList.getArguments()[0];
+//                    System.out.println("The URL is: " + urlArgument.getText());
+//
+//                    // 5. Access the enclosing function
+//                    JSFunction function = PsiTreeUtil.getParentOfType(argumentList, JSFunction.class);
+//                    if (function != null) {
+//                        System.out.println("The enclosing function is: " + function.getName());
+//                    }
+//                }
+//            }
 
 
         } else if ("js".equals(extension)) {
@@ -305,9 +356,6 @@ public class upAction extends AnAction {
 //        IProperty IProperty = PropertiesImplUtil.getProperty(selectedElement);
 //        System.out.println("IProperty:" + IProperty);
 
-
-
-        // ============================================
 
 
 
