@@ -63,7 +63,7 @@ public class JavaToVue {
             ProjectManager projectManager = ProjectManager.getInstance();
             for (Project openProject : projectManager.getOpenProjects()) {
                 System.out.println("frontendProjectPath: " + frontendProjectPath);
-                System.out.println("open path: " + openProject.getBasePath());
+//                System.out.println("open frontend path: " + openProject.getBasePath());
 
                 if (frontendProjectPath.equals(openProject.getBasePath())) {
                     // This is the frontend project.

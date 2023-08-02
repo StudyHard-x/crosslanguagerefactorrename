@@ -1,6 +1,10 @@
-package com.cross.crosstest.action;
+ package com.cross.crosstest.action;
 
 import com.cross.crosstest.api.JavaToVue;
+import com.cross.crosstest.api.VueToJava;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.intellij.codeInsight.AnnotationUtil;
 import com.intellij.lang.javascript.psi.*;
 import com.intellij.lang.javascript.psi.ecma6.JSStringTemplateExpression;
@@ -24,11 +28,23 @@ import com.intellij.util.Query;
 import org.apache.tools.ant.taskdefs.Java;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
 
-public class upAction extends AnAction {
+
+ public class upAction extends AnAction {
+
 
     @Override
     public void actionPerformed(AnActionEvent e) {
+
+
+
         // TODO: insert action logic here
         Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
 //        String selectedText = selectionModel.getSelectedText();
@@ -157,7 +173,6 @@ public class upAction extends AnAction {
                     //url
                 } else if (parent instanceof PsiAnnotation) {
 
-                    System.out.println("get url");
                     PsiAnnotation annotation = (PsiAnnotation) parent;
                     if (annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.GetMapping")
                     || annotation.getQualifiedName().equals("org.springframework.web.bind.annotation.PostMapping")) {
@@ -217,6 +232,8 @@ public class upAction extends AnAction {
             }
 
         } else if ("vue".equals(extension)) {
+            VueToJava vueToJava = new VueToJava();
+
             int start = selectionModel.getSelectionStart();
             PsiElement selectVueElement = psiFile.findElementAt(start);
             System.out.println("select: " + selectedElement);
@@ -241,11 +258,31 @@ public class upAction extends AnAction {
                 String newUrl = oldUrl.replace(oldName, newName);
 
                 if (newName != null && !newName.isEmpty()) {
-                    WriteCommandAction.runWriteCommandAction(project, () -> {
-                        PsiElement newElement = selectVueElement.replace(JavaPsiFacade.getElementFactory(project).createExpressionFromText(newUrl, null));
-                        CodeStyleManager.getInstance(project).reformat(newElement);
-                    });
+                    boolean success;
+                    try {
+                        success = vueToJava.toJava(oldName, newName, project, oldUrl, "url");
+                    } catch (MalformedURLException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    System.out.println("success bo:" + success);
+                    if(success){
+                        WriteCommandAction.runWriteCommandAction(project, () -> {
+                            PsiElement newElement = selectVueElement.replace(JavaPsiFacade.getElementFactory(project).createExpressionFromText(newUrl, null));
+                            CodeStyleManager.getInstance(project).reformat(newElement);
+                        });
+                    }
 
+
+
+//                    WriteCommandAction.runWriteCommandAction(project, () -> {
+//                        PsiElement newElement = selectVueElement.replace(JavaPsiFacade.getElementFactory(project).createExpressionFromText(newUrl, null));
+//                        CodeStyleManager.getInstance(project).reformat(newElement);
+//                    });
+//                    try {
+//                        vueToJava.toJava(oldName, newName, project, oldUrl, "url");
+//                    } catch (IOException ex) {
+//                        throw new RuntimeException(ex);
+//                    }
                 }
 
             }
@@ -468,4 +505,7 @@ public class upAction extends AnAction {
         });
         return input;
     }
+
+
+    //test
 }
