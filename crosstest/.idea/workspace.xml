@@ -5,13 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="439006d2-b3c5-42cd-b05c-cec9fbc75b72" name="Changes" comment="vue to java">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/action/upAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/action/upAction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/JavaToVue.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/JavaToVue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/VueToJava.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/VueToJava.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/dialog/AddDialog.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../mcsproject/src/main/java/com/mcs/mcsproject/controller/UsersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../mcsproject/src/main/java/com/mcs/mcsproject/controller/UsersController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -298,7 +291,7 @@
       <workItem from="1691529431085" duration="1420000" />
       <workItem from="1691577188068" duration="2314000" />
       <workItem from="1691594172549" duration="5940000" />
-      <workItem from="1691603947148" duration="3263000" />
+      <workItem from="1691603947148" duration="3843000" />
     </task>
     <task id="LOCAL-00001" summary="cross test">
       <created>1687362364141</created>
@@ -356,7 +349,14 @@
       <option name="project" value="LOCAL" />
       <updated>1691030863571</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="vue to java">
+      <created>1691610641447</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1691610641447</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -371,8 +371,8 @@
     <MESSAGE value="url in java" />
     <MESSAGE value="java to vue; error message" />
     <MESSAGE value="vue url" />
-    <MESSAGE value="vue to java" />
     <MESSAGE value="java map to vue" />
-    <option name="LAST_COMMIT_MESSAGE" value="java map to vue" />
+    <MESSAGE value="vue to java" />
+    <option name="LAST_COMMIT_MESSAGE" value="vue to java" />
   </component>
 </project>

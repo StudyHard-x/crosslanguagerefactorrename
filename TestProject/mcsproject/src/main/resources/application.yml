@@ -1,0 +1,15 @@
+spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    url: jdbc:mysql://localhost:3306/table?characterEncoding=utf-8&allowPublicKeyRetrieval=true&serverTimezone=UTC&useSSL=false
+    username: root
+    password: xch8886
+
+#    spring.web.resources.cache.cachecontrol.max-age=7200
+
+server:
+  port: 8081

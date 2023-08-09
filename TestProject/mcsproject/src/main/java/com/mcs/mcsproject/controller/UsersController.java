@@ -10,13 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * (Users)表控制层
- *
- * @author makejava
- * @since 2023-06-18 19:01:43
- */
-//@RestController 用于前后端分离
+
 @RestController
 @RequestMapping("/users")
 public class UsersController {
@@ -24,15 +18,32 @@ public class UsersController {
     private UsersService usersService;
 
 
-    @GetMapping("/wel")
-    public Map<String, Object> test(){
+    @GetMapping("/newTest1")
+    public Map<String, Object> test1(){
         Map<String,Object> map = new HashMap<>();
-        map.put("12345",1);
-        map.put("1223",2);
+        map.put("test112",1);
+        map.put("test2",2);
         return map;
     }
 
-    @GetMapping("/test")
+    @GetMapping("/TestNew2")
+    public Map<String, Object> test2(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("newTest123",1);
+        map.put("test2",2);
+        return map;
+    }
+
+    @GetMapping("/newTest03")
+    public Map<String, Object> test3(){
+        Map<String,Object> map = new HashMap<>();
+        map.put("test1",1);
+        map.put("test2",2);
+        return map;
+    }
+
+
+    @GetMapping("/test01")
     public String wecHome(@RequestParam("name") String name, Model model,@PathVariable Integer id){
         model.addAttribute("msg",name);
         Map<String,Object> map = new HashMap<>();
