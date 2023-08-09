@@ -1,29 +1,21 @@
 package com.cross.crosstest.api;
 
-
 import com.intellij.lang.javascript.psi.*;
 import com.intellij.lang.javascript.psi.impl.JSChangeUtil;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.Document;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileTypes.PlainTextFileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
 import com.intellij.psi.*;
 import com.intellij.psi.codeStyle.CodeStyleManager;
-import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.refactoring.rename.PsiElementRenameHandler;
+import com.intellij.psi.search.searches.ReferencesSearch;
 import org.jetbrains.annotations.NotNull;
-import com.intellij.openapi.project.ProjectUtil;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -178,29 +170,98 @@ public class JavaToVue {
                                                                                                         && qualifierRef.getReferencedName().equals("data")
                                                                                                         && refName.equals(oldName)) {
 
-                                                                                                    System.out.println("already to rename");
+                                                                                                    System.out.println("rename the resp.data.xxxx");
                                                                                                     WriteCommandAction.runWriteCommandAction(project, () -> {
                                                                                                         PsiElement newElement = JSChangeUtil.createStatementFromText(project, newName).getPsi();
                                                                                                         node.getReferenceNameElement().replace(newElement);
                                                                                                     });
+
                                                                                                 }
+
+
                                                                                             }
-
-
-                                                                                        }
-
-
-                                                                                        if (isQualifierResp(node) && refName.equals(oldName)) {
-                                                                                            System.out.println("newName is :" + newName);
-                                                                                            // 新名称
-
-                                                                                            // 执行重命名操作
-//                                                                                            WriteCommandAction.runWriteCommandAction(project, () -> {
-//                                                                                                JSReferenceElement referenceElement = JSChangeUtil.createReferenceFromText(project, newName);
-//                                                                                                node.getReferenceNameElement().replace(referenceElement);
-//                                                                                            });
                                                                                         }
                                                                                     }
+
+                                                                                    public void visitJSAssignmentExpression(JSAssignmentExpression assignmentExpression) {
+                                                                                        super.visitJSAssignmentExpression(assignmentExpression);
+
+                                                                                        JSExpression leftExpression = assignmentExpression.getLOperand();
+                                                                                        JSExpression rightExpression = assignmentExpression.getROperand();
+
+                                                                                        if (rightExpression instanceof JSReferenceExpression) {
+                                                                                            System.out.println("go next step 1 ");
+                                                                                            JSReferenceExpression rightRef = (JSReferenceExpression) rightExpression;
+                                                                                            if (rightRef.getQualifier() != null && rightRef.getQualifier().getText().equals("resp") &&
+                                                                                                    rightRef.getReferencedName() != null && rightRef.getReferencedName().equals("data")) {
+                                                                                                System.out.println("go next step 2 ");
+                                                                                                System.out.println(leftExpression.getText());
+                                                                                                System.out.println(leftExpression.getClass().getSimpleName());
+
+                                                                                                if (leftExpression instanceof JSDefinitionExpression) {
+                                                                                                    JSDefinitionExpression leftDef = (JSDefinitionExpression) leftExpression;
+                                                                                                    JSExpression expression = leftDef.getExpression();
+                                                                                                    if (expression instanceof JSReferenceExpression) {
+                                                                                                        JSReferenceExpression leftRef = (JSReferenceExpression) expression;
+                                                                                                        if (leftRef.getQualifier() != null && leftRef.getQualifier().getText().equals("this")) {
+                                                                                                            String xxxx = leftRef.getReferencedName();
+
+                                                                                                            PsiElement leftDataElement = leftRef.getReferenceNameElement();
+
+                                                                                                            System.out.println("leftDataE: " + leftDataElement.getText());
+
+                                                                                                            TextRange range = leftDataElement.getTextRange();
+                                                                                                            int start = range.getStartOffset();
+                                                                                                            int end = range.getEndOffset();
+
+                                                                                                            PsiReference referencesSearch =  psiFile.findReferenceAt(start);
+                                                                                                            PsiElement psiElement = referencesSearch.resolve();
+
+                                                                                                            System.out.println("referencesSearch" + referencesSearch);
+
+                                                                                                            Collection<PsiReference> references = ReferencesSearch.search(psiElement, GlobalSearchScope.projectScope(frontendProject)).findAll();
+//                                                                                                            Collection<PsiReference> references = ReferencesSearch.search(leftDataElement).findAll();
+                                                                                                            System.out.println("references: " + references);
+
+                                                                                                            for (PsiReference ref : references) {
+                                                                                                                PsiElement usageElement = ref.getElement();
+                                                                                                                System.out.println("usageElement : " +  usageElement);
+                                                                                                                System.out.println("usageElement text: " +  usageElement.getText());
+                                                                                                                // 在这里处理每一个引用
+                                                                                                                System.out.println("usage parent:" + usageElement.getParent().getText());
+
+                                                                                                                PsiElement parentElement = usageElement.getParent();
+
+
+                                                                                                                if (parentElement instanceof JSReferenceExpression) {
+                                                                                                                    JSReferenceExpression parentRef = (JSReferenceExpression) parentElement;
+
+                                                                                                                    System.out.println("parentRef fff: " + parentRef.getReferenceName());
+                                                                                                                    PsiElement renameElement = parentRef.getReferenceNameElement();
+                                                                                                                    System.out.println(renameElement.getClass().getSimpleName());
+
+                                                                                                                    if(finalOldKey.equals(parentRef.getReferenceName())){
+                                                                                                                        WriteCommandAction.runWriteCommandAction(project, () -> {
+                                                                                                                            PsiElement newElement = renameElement.replace(JavaPsiFacade.getElementFactory(frontendProject).createExpressionFromText(finalNewKey, null));
+                                                                                                                            CodeStyleManager.getInstance(frontendProject).reformat(newElement);
+                                                                                                                        });
+
+                                                                                                                    }
+
+                                                                                                                }
+                                                                                                            }
+
+
+
+
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+
+
                                                                                 });
 
 // 新增方法，检查qualifier是否是"resp

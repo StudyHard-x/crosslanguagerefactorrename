@@ -1,7 +1,5 @@
 package com.cross.crosstest.api;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,7 +74,6 @@ public class VueToJava {
 
             if (childDir.isDirectory()) {
                 backendProjectPath = childDir.getPath();
-//                System.out.println("backendProjectPath: " + backendProjectPath);
                 break; // Assuming there are only two directories, we can break after finding the first non-backend directory.
             }
         }

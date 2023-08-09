@@ -16,9 +16,9 @@ repositories {
 // Configure Gradle IntelliJ Plugin
 // Read more: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 intellij {
-    localPath.set("D:\\intellij2023\\IntelliJ IDEA 2022.3.2")
-//    version.set("2022.3.2")
-//    type.set("IC") // Target IDE Platform
+//    localPath.set("D:\\intellij2023\\IntelliJ IDEA 2022.3.2")
+    version.set("2022.3.2")
+    type.set("IU")
     plugins.set(listOf("java", "properties","JavaScript"))
 }
 
@@ -35,7 +35,7 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set("221")
+        sinceBuild.set("223")
         untilBuild.set("231.*")
     }
 

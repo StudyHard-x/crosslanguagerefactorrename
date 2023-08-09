@@ -3,10 +3,10 @@
     <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
     <id>com.cross.crosstest</id>
     <version>1.0</version>
-    <name>crosstest</name>
+<!--    <name>crosstest</name>-->
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Crosstest</name>
+    <name>Cross Language Refactor</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
     <vendor email="2750443x@student.gla.ac.uk" url="2750443x@student.gla.ac.uk">CH_X</vendor>
@@ -15,8 +15,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    cross language test.<br>
-    <em>most HTML t1ags may be used</em>
+    cross language refactor in Vue and Springboot.<br>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
@@ -31,8 +30,8 @@
 
     </extensions>
     <actions>
-        <action id="upaction_ID" class="com.cross.crosstest.action.upAction" text="cross_test" description="for testing">
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        <action id="upaction_ID" class="com.cross.crosstest.action.upAction" text="Cross Language Rename" description="for testing">
+            <add-to-group group-id="RefactoringMenu" anchor="first"/>
         </action>
     </actions>
 </idea-plugin>

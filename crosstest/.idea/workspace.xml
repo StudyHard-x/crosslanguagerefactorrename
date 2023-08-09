@@ -4,9 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="439006d2-b3c5-42cd-b05c-cec9fbc75b72" name="Changes" comment="map in java">
+    <list default="true" id="439006d2-b3c5-42cd-b05c-cec9fbc75b72" name="Changes" comment="vue to java">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/action/upAction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/action/upAction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/JavaToVue.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/JavaToVue.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/VueToJava.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/api/VueToJava.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/cross/crosstest/dialog/AddDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/META-INF/plugin.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../mcsproject/src/main/java/com/mcs/mcsproject/controller/UsersController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../mcsproject/src/main/java/com/mcs/mcsproject/controller/UsersController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,13 +52,8 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="crosstest" type="f1a62948:ProjectNode" />
-                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="crosstest" type="f1a62948:ProjectNode" />
-                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
-                <item name="compileClasspath" type="62daadca:ExternalSystemViewDefaultContributor$DependencyScopeExternalSystemNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="intellij" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -120,7 +120,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Gradle.crosstest [buildPlugin]">
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.cross.crosstest.api" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.crosstest [buildPlugin] (1)">
     <configuration name="SwaggerAction" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.cross.crosstest.api.SwaggerAction" />
       <module name="crosstest.main" />
@@ -133,6 +138,27 @@
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="crosstest [buildPlugin] (1)" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="buildPlugin" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
     </configuration>
     <configuration name="crosstest [buildPlugin]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
@@ -155,12 +181,37 @@
       <DebugAllEnabled>false</DebugAllEnabled>
       <method v="2" />
     </configuration>
+    <configuration name="crosstest [runPluginVerifier]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="--scan" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="runPluginVerifier" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Application.SwaggerAction" />
+      <item itemvalue="Gradle.crosstest [buildPlugin] (1)" />
+      <item itemvalue="Gradle.crosstest [runPluginVerifier]" />
       <item itemvalue="Gradle.crosstest [buildPlugin]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.crosstest [buildPlugin] (1)" />
+        <item itemvalue="Gradle.crosstest [runPluginVerifier]" />
         <item itemvalue="Gradle.crosstest [buildPlugin]" />
         <item itemvalue="Application.SwaggerAction" />
       </list>
@@ -232,7 +283,22 @@
       <workItem from="1690625638397" duration="5110000" />
       <workItem from="1690659003492" duration="8354000" />
       <workItem from="1690712469128" duration="4481000" />
-      <workItem from="1690740544057" duration="1409000" />
+      <workItem from="1690740544057" duration="7966000" />
+      <workItem from="1690799953320" duration="3323000" />
+      <workItem from="1690829400523" duration="5757000" />
+      <workItem from="1690884383670" duration="5206000" />
+      <workItem from="1690911864868" duration="17495000" />
+      <workItem from="1690977389133" duration="28042000" />
+      <workItem from="1691019063973" duration="11869000" />
+      <workItem from="1691058904187" duration="9997000" />
+      <workItem from="1691073630671" duration="3853000" />
+      <workItem from="1691091861163" duration="15965000" />
+      <workItem from="1691141923211" duration="93000" />
+      <workItem from="1691142265659" duration="4859000" />
+      <workItem from="1691529431085" duration="1420000" />
+      <workItem from="1691577188068" duration="2314000" />
+      <workItem from="1691594172549" duration="5940000" />
+      <workItem from="1691603947148" duration="3263000" />
     </task>
     <task id="LOCAL-00001" summary="cross test">
       <created>1687362364141</created>
@@ -255,7 +321,42 @@
       <option name="project" value="LOCAL" />
       <updated>1690309535412</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="url in java">
+      <created>1690742203805</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1690742203805</updated>
+    </task>
+    <task id="LOCAL-00005" summary="java to vue; error message">
+      <created>1690757880565</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1690757880565</updated>
+    </task>
+    <task id="LOCAL-00006" summary="vue url">
+      <created>1690835232894</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1690835232894</updated>
+    </task>
+    <task id="LOCAL-00007" summary="vue to java">
+      <created>1691018496760</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1691018496760</updated>
+    </task>
+    <task id="LOCAL-00008" summary="java map to vue">
+      <created>1691030863571</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1691030863571</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -267,6 +368,11 @@
     </ignored-roots>
     <MESSAGE value="cross test" />
     <MESSAGE value="map in java" />
-    <option name="LAST_COMMIT_MESSAGE" value="map in java" />
+    <MESSAGE value="url in java" />
+    <MESSAGE value="java to vue; error message" />
+    <MESSAGE value="vue url" />
+    <MESSAGE value="vue to java" />
+    <MESSAGE value="java map to vue" />
+    <option name="LAST_COMMIT_MESSAGE" value="java map to vue" />
   </component>
 </project>
