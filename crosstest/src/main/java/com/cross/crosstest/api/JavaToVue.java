@@ -91,7 +91,7 @@ public class JavaToVue {
 //                                                        System.out.println("find element: " + element.getText());
                                                         String oldUrl = element.getText();
                                                         String newUrl = oldUrl.replace(finalOldKey, finalNewKey);
-                                                        System.out.println("newUrl: " + newUrl);
+//                                                        System.out.println("newUrl: " + newUrl);
 
                                                         WriteCommandAction.runWriteCommandAction(frontendProject, () -> {
                                                             PsiElement newElement = element.replace(JavaPsiFacade.getElementFactory(frontendProject).createExpressionFromText(newUrl, null));
@@ -114,40 +114,22 @@ public class JavaToVue {
                                                 @Override
                                                 public void visitElement(@NotNull PsiElement element) {
                                                     if (element.getText().matches(regex)) {
-                                                        System.out.println("find element: " + element);
-                                                        System.out.println("find element text : " + element.getText());
-//                                                        PsiElement parent = element;
-//                                                        while (!(parent instanceof JSCallExpression)) {
-//                                                            parent = parent.getParent();
-//                                                        }
                                                         PsiElement parent = element.getParent().getParent();
-
-                                                        System.out.println("parent: " + parent.getClass().getSimpleName());
-
                                                         if (parent instanceof JSCallExpression) {
                                                             JSCallExpression callExpression = (JSCallExpression) parent;
                                                             JSArgumentList argumentList = callExpression.getArgumentList();
-//                                                            System.out.println("argumentlsit: " + argumentList.getText());
                                                             if (argumentList != null) {
                                                                 JSExpression[] expressions = argumentList.getArguments();
                                                                 for (JSExpression expression : expressions) {
-                                                                    System.out.println("expression: " + expression);
                                                                     if (expression instanceof JSFunctionExpression) {
                                                                         JSFunctionExpression functionExpression = (JSFunctionExpression) expression;
                                                                         JSParameterListElement[] parameters = functionExpression.getParameterList().getParameters();
                                                                         for (JSParameterListElement parameter : parameters) {
                                                                             if (parameter.getText().equals("resp")) {
-                                                                                System.out.println("Parameter: " + parameter.getText());
-
-
                                                                                 PsiElement parentElement = parameter.getParent();
-
                                                                                 while (!(parentElement instanceof JSBlockStatement)) {
                                                                                     parentElement = parentElement.getParent();
                                                                                 }
-
-//                                                                                System.out.println("parent for recuresive:" + parentElement);
-
                                                                                 parentElement.accept(new JSRecursiveElementVisitor() {
                                                                                     @Override
                                                                                     public void visitJSReferenceExpression(JSReferenceExpression node) {
@@ -169,8 +151,6 @@ public class JavaToVue {
                                                                                                 if (qualifierRefQualifierRef.getReferencedName().equals("resp")
                                                                                                         && qualifierRef.getReferencedName().equals("data")
                                                                                                         && refName.equals(oldName)) {
-
-                                                                                                    System.out.println("rename the resp.data.xxxx");
                                                                                                     WriteCommandAction.runWriteCommandAction(project, () -> {
                                                                                                         PsiElement newElement = JSChangeUtil.createStatementFromText(project, newName).getPsi();
                                                                                                         node.getReferenceNameElement().replace(newElement);
@@ -190,56 +170,28 @@ public class JavaToVue {
                                                                                         JSExpression rightExpression = assignmentExpression.getROperand();
 
                                                                                         if (rightExpression instanceof JSReferenceExpression) {
-                                                                                            System.out.println("go next step 1 ");
+//                                                                                            System.out.println("go next step 1 ");
                                                                                             JSReferenceExpression rightRef = (JSReferenceExpression) rightExpression;
                                                                                             if (rightRef.getQualifier() != null && rightRef.getQualifier().getText().equals("resp") &&
                                                                                                     rightRef.getReferencedName() != null && rightRef.getReferencedName().equals("data")) {
-                                                                                                System.out.println("go next step 2 ");
-                                                                                                System.out.println(leftExpression.getText());
-                                                                                                System.out.println(leftExpression.getClass().getSimpleName());
-
                                                                                                 if (leftExpression instanceof JSDefinitionExpression) {
                                                                                                     JSDefinitionExpression leftDef = (JSDefinitionExpression) leftExpression;
                                                                                                     JSExpression expression = leftDef.getExpression();
                                                                                                     if (expression instanceof JSReferenceExpression) {
                                                                                                         JSReferenceExpression leftRef = (JSReferenceExpression) expression;
                                                                                                         if (leftRef.getQualifier() != null && leftRef.getQualifier().getText().equals("this")) {
-                                                                                                            String xxxx = leftRef.getReferencedName();
-
                                                                                                             PsiElement leftDataElement = leftRef.getReferenceNameElement();
-
-                                                                                                            System.out.println("leftDataE: " + leftDataElement.getText());
-
                                                                                                             TextRange range = leftDataElement.getTextRange();
                                                                                                             int start = range.getStartOffset();
-                                                                                                            int end = range.getEndOffset();
-
                                                                                                             PsiReference referencesSearch =  psiFile.findReferenceAt(start);
                                                                                                             PsiElement psiElement = referencesSearch.resolve();
-
-                                                                                                            System.out.println("referencesSearch" + referencesSearch);
-
                                                                                                             Collection<PsiReference> references = ReferencesSearch.search(psiElement, GlobalSearchScope.projectScope(frontendProject)).findAll();
-//                                                                                                            Collection<PsiReference> references = ReferencesSearch.search(leftDataElement).findAll();
-                                                                                                            System.out.println("references: " + references);
-
                                                                                                             for (PsiReference ref : references) {
                                                                                                                 PsiElement usageElement = ref.getElement();
-                                                                                                                System.out.println("usageElement : " +  usageElement);
-                                                                                                                System.out.println("usageElement text: " +  usageElement.getText());
-                                                                                                                // 在这里处理每一个引用
-                                                                                                                System.out.println("usage parent:" + usageElement.getParent().getText());
-
                                                                                                                 PsiElement parentElement = usageElement.getParent();
-
-
                                                                                                                 if (parentElement instanceof JSReferenceExpression) {
                                                                                                                     JSReferenceExpression parentRef = (JSReferenceExpression) parentElement;
-
-                                                                                                                    System.out.println("parentRef fff: " + parentRef.getReferenceName());
                                                                                                                     PsiElement renameElement = parentRef.getReferenceNameElement();
-                                                                                                                    System.out.println(renameElement.getClass().getSimpleName());
-
                                                                                                                     if(finalOldKey.equals(parentRef.getReferenceName())){
                                                                                                                         WriteCommandAction.runWriteCommandAction(project, () -> {
                                                                                                                             PsiElement newElement = renameElement.replace(JavaPsiFacade.getElementFactory(frontendProject).createExpressionFromText(finalNewKey, null));
@@ -327,10 +279,6 @@ public class JavaToVue {
 //        return result.get();
     }
 
-    private boolean isQualifierResp(JSReferenceExpression node) {
-        JSExpression qualifier = node.getQualifier();
-        return qualifier != null && qualifier.getText().equals("resp");
-    }
 
 }
 //        String oldKey = selectedElement.getText();
